@@ -14,6 +14,9 @@ import Summary from './screens/Summary';
 import Ask from './screens/Ask';
 import Live from './screens/Live';
 import Wait from './screens/Wait';
+import Review from './screens/Review';
+import ReviewItem from './screens/ReviewItem';
+import Done from './screens/Done';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -39,6 +42,9 @@ export function AppRoutes() {
         <Route path="ask" element={<Ask />} />
         <Route path="live" element={<Live />} />
         <Route path="wait/:id" element={<Wait />} />
+        <Route path="review" element={<Review />} />
+        <Route path="review/:id" element={<ReviewItem />} />
+        <Route path="done" element={<Done />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
