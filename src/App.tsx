@@ -11,6 +11,8 @@ import Finding from './screens/Finding';
 import Evidence from './screens/Evidence';
 import Help from './screens/Help';
 import Summary from './screens/Summary';
+import Ask from './screens/Ask';
+import Live from './screens/Live';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -33,6 +35,8 @@ export function AppRoutes() {
         <Route path="help" element={<Help />} />
         <Route path="help/:term" element={<Help />} />
         <Route path="summary" element={<Summary />} />
+        <Route path="ask" element={<Ask />} />
+        <Route path="live" element={<Live />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
