@@ -13,6 +13,7 @@ import Help from './screens/Help';
 import Summary from './screens/Summary';
 import Ask from './screens/Ask';
 import Live from './screens/Live';
+import Wait from './screens/Wait';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -37,6 +38,7 @@ export function AppRoutes() {
         <Route path="summary" element={<Summary />} />
         <Route path="ask" element={<Ask />} />
         <Route path="live" element={<Live />} />
+        <Route path="wait/:id" element={<Wait />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
