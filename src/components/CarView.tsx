@@ -17,9 +17,11 @@ const VIEW_LABEL: Record<View, string> = {
 
 export function CarView({ view, zoomed, selectedId, onSelect, caption }: Props) {
   const selected = FINDINGS.find((f) => f.id === selectedId)!.markers[view];
+  // Keep the far-side target reachable when zooming in on the left marker.
+  const zoomOrigin = `max(40%, ${(selected.x / 320) * 100}%) ${(selected.y / 200) * 100}%`;
   return (
     <div className={`car-view${zoomed ? ' is-zoomed' : ''}`}>
-      <div className="car-view__stage" style={{ transformOrigin: `${(selected.x / 320) * 100}% ${(selected.y / 200) * 100}%` }}>
+      <div className="car-view__stage" style={{ transformOrigin: zoomOrigin }}>
         <svg className="car-svg" viewBox="0 0 320 200" role="img" aria-label={VIEW_LABEL[view]}>
           <ellipse className="car-shadow" cx="160" cy="172" rx="140" ry="12" />
           <g transform={view === 'rear-right' ? 'translate(320 0) scale(-1 1)' : undefined}>
@@ -54,7 +56,7 @@ export function CarView({ view, zoomed, selectedId, onSelect, caption }: Props) 
               aria-label={`Finding ${f.number}, ${f.title}, ${STATUS_LABEL[f.status]}${m.far ? ', far side' : ''}`}
               onClick={() => onSelect(f.id)}
             >
-              {f.number}
+              <span className="car-marker__badge" aria-hidden="true">{f.number}</span>
             </button>
           );
         })}

@@ -43,11 +43,12 @@ p.oh-small, p.oh-body { margin: 0; }
 .car-tire { fill: var(--oh-navy); }
 .car-rim { fill: var(--oh-paper); stroke: var(--oh-navy); stroke-width: 1.5; }
 .car-light { fill: var(--oh-blue-tint); stroke: var(--oh-navy); stroke-width: 1.2; }
-.car-marker { position: absolute; transform: translate(-50%, -50%); width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--oh-paper); background: var(--oh-navy); color: var(--oh-paper); font: 600 14px/1 var(--oh-font-mono); cursor: pointer; display: grid; place-items: center; box-shadow: 0 0 0 3px var(--edge); }
+.car-marker { position: absolute; transform: translate(-50%, -50%); min-inline-size: 44px; min-block-size: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; }
+.car-marker__badge { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--oh-paper); background: var(--oh-navy); color: var(--oh-paper); font: 600 14px/1 var(--oh-font-mono); display: grid; place-items: center; box-shadow: 0 0 0 3px var(--edge); }
 .car-marker--attention { --edge: var(--oh-red); }
 .car-marker--soon { --edge: var(--oh-amber); }
-.car-marker.is-far { background: var(--oh-paper); color: var(--oh-navy); border: 2px dashed var(--oh-navy); }
-.car-marker.is-selected { outline: 3px solid var(--oh-blue); outline-offset: 3px; }
+.car-marker.is-far .car-marker__badge { background: var(--oh-paper); color: var(--oh-navy); border-color: var(--oh-navy); border-style: dashed; }
+.car-marker.is-selected .car-marker__badge { outline: 3px solid var(--oh-blue); outline-offset: 3px; }
 .car-view__caption { margin: 10px 0 0; }
 
 /* Evidence */
@@ -79,7 +80,7 @@ p.oh-small, p.oh-body { margin: 0; }
 .composer { display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 12px; background: var(--oh-paper); border: 1px solid var(--oh-line-strong); border-radius: var(--oh-radius); }
 .composer:focus-within { border-color: var(--oh-blue); box-shadow: 0 0 0 3px rgba(63, 136, 197, .3); }
 .composer input { flex: 1; min-width: 0; border: 0; outline: none; background: none; font: 400 15px/1.4 var(--oh-font); color: var(--oh-ink); }
-.composer .oh-btn--icon { width: 40px; min-height: 40px; }
+.composer .oh-btn--icon { flex-shrink: 0; }
 
 /* Voice note */
 .voice { display: flex; align-items: center; gap: 10px; background: var(--oh-blue-tint); border-radius: var(--oh-radius); padding: 8px; min-width: 220px; }
