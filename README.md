@@ -16,3 +16,5 @@ Frontend-only MVP of the OpenHood customer phone app: inspect findings, ask the 
 Add `?model=off` to `#/inspect` to see the "3D model unavailable" state. "Reset demo" is in the Help tab.
 
 Requires Node 20+. On Node 22+ the test config turns off Node's built-in `localStorage` so jsdom's is used.
+
+**Live:** https://yongjies-cmu-s26.github.io/openhood-app/ (deployed by `.github/workflows/deploy.yml` on every push to `main`).
