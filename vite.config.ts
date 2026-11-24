@@ -11,8 +11,6 @@ export default defineConfig({
     css: false,
     // Node 22+ ships its own global localStorage that hides jsdom's; turn it off in test workers.
     pool: 'forks',
-    poolOptions: {
-      forks: { execArgv: Number(process.versions.node.split('.')[0]) >= 22 ? ['--no-experimental-webstorage'] : [] },
-    },
+    execArgv: Number(process.versions.node.split('.')[0]) >= 22 ? ['--no-experimental-webstorage'] : [],
   },
 });
