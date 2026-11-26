@@ -12,8 +12,8 @@ export function ChatBubble({ message }: { message: Message }) {
       </span>
       {message.kind === 'voice' ? (
         <>
-          <VoiceNote durationSec={message.durationSec ?? 6} />
-          <p className="bubble-transcript">{mine ? 'Sample voice note' : `“${message.text}”`}</p>
+          <VoiceNote durationSec={message.durationSec ?? 6} audioUrl={message.audioUrl} speakText={mine ? undefined : message.text} />
+          <p className="bubble-transcript">{mine ? message.text : `“${message.text}”`}</p>
         </>
       ) : (
         <span className="bubble-text">{message.text}</span>

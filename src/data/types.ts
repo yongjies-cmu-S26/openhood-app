@@ -60,4 +60,6 @@ export interface Message {
   text: string;
   at: string;
   durationSec?: number;
+  /** data: URL of a real recording (customer voice questions) */
+  audioUrl?: string;
 }

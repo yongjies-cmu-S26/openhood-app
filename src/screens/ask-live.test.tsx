@@ -31,3 +31,24 @@ test('live view switches camera and reflects decisions', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Switch to front-wheel camera' }));
   expect(screen.getByText('Camera 2 · Front-wheel camera')).toBeInTheDocument();
 });
+
+test('mic falls back to a sample voice note when recording is unavailable', async () => {
+  renderApp('/ask');
+  await userEvent.click(screen.getByRole('button', { name: 'Record a voice question' }));
+  expect(screen.getByRole('alert')).toHaveTextContent(/sample voice note was sent/);
+  expect(screen.getByText('Sample voice note', { selector: '.oh-bubble--me .bubble-transcript' })).toBeInTheDocument();
+});
+
+test('technician voice replies are read aloud', async () => {
+  const speak = vi.fn();
+  const cancel = vi.fn();
+  vi.stubGlobal('speechSynthesis', { speak, cancel, getVoices: () => [] });
+  vi.stubGlobal('SpeechSynthesisUtterance', class { text: string; lang = ''; constructor(t: string) { this.text = t; } });
+  renderApp('/ask');
+  await userEvent.click(screen.getByRole('button', { name: 'Play voice note' }));
+  expect(speak).toHaveBeenCalledTimes(1);
+  expect(speak.mock.calls[0][0].text).toMatch(/front pads are worn thin/);
+  await userEvent.click(screen.getByRole('button', { name: 'Stop voice note' }));
+  expect(cancel).toHaveBeenCalled();
+  vi.unstubAllGlobals();
+});

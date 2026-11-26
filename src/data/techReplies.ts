@@ -7,9 +7,9 @@ export interface Reply {
 }
 
 const REPLIES: Record<string, Reply> = {
-  'Why both pads?': { text: 'Pads are replaced in pairs so both front wheels brake evenly. Replacing one side can make the car pull.', durationSec: 18 },
-  'Can it wait?': { text: 'I wouldn’t wait long. At 3 mm the pads are below the 4 mm minimum, and waiting risks damaging the rotor.', durationSec: 21 },
-  'What does it cost?': { text: 'Front pads are $260 total: $140 parts, $100 labor and $20 tax. You pay at pickup.', durationSec: 15 },
+  'Why both pads?': { text: 'Pads are replaced in pairs so both front wheels brake evenly. Replacing one side can make the car pull.', durationSec: 8 },
+  'Can it wait?': { text: 'I wouldn’t wait long. At 3 mm the pads are below the 4 mm minimum, and waiting risks damaging the rotor.', durationSec: 10 },
+  'What does it cost?': { text: 'Front pads are $260 total: $140 parts, $100 labor and $20 tax. You pay at pickup.', durationSec: 9 },
 };
 
 export const GENERIC_REPLY: Reply = {

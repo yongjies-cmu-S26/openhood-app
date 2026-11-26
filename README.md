@@ -31,7 +31,7 @@ Run `npm test` to run the tests. Use `npm run build` to generate the static site
 ## Limitations
 
 - **Sample data and local storage.** The visit, findings, prices, and repair timing estimates are illustrative. Chat messages and repair decisions are stored in the current browser, with no backend or sync across devices.
-- **Simulated vehicle view and media.** Inspection uses two zoomable SVG views with annotated evidence diagrams. The bay camera is illustrative. Technician replies are scripted, and voice notes simulate recording and playback without using a microphone or playing audio.
+- **Simulated vehicle view and media.** Inspection uses two zoomable SVG views with annotated evidence diagrams. The bay camera is illustrative. Technician replies are scripted. The mic records a real voice question (up to 60 seconds, saved in this browser) and plays it back; if recording is unavailable, a sample note is sent instead. Technician voice replies are read aloud with the browser's built-in speech voice rather than a recorded human voice.
 - **Incomplete customer interactions.** The timing picker supports taps and keyboard selection. Dragging is unavailable. Glossary definitions open a separate screen. Chat always shows the front-brake topic, and navigating away cancels a pending scripted reply.
 - **Customer workflow only.** The service-advisor dashboard and outbound status updates are outside this build. The app does not send SMS, email, or real chat messages, and it does not authenticate users, accept payment, or authorize actual repairs.
 

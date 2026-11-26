@@ -20,7 +20,7 @@ export const SEED_MESSAGES: Message[] = [
     kind: 'voice',
     text: 'The front pads are worn thin. Replacing both front pads helps restore consistent braking.',
     at: '11:31 AM',
-    durationSec: 24,
+    durationSec: 7,
   },
 ];
 
