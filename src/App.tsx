@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/AppShell';
 import { ToastProvider } from './components/Toast';
 import { VisitProvider } from './state/VisitContext';
+import Advisor from './screens/Advisor';
 import NotFound from './screens/NotFound';
 import Inspect from './screens/Inspect';
 import Findings from './screens/Findings';
@@ -17,6 +18,7 @@ import Wait from './screens/Wait';
 import Review from './screens/Review';
 import ReviewItem from './screens/ReviewItem';
 import Done from './screens/Done';
+import UpdatePreview from './screens/UpdatePreview';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -29,6 +31,8 @@ export function Providers({ children }: { children: ReactNode }) {
 export function AppRoutes() {
   return (
     <Routes>
+      <Route path="advisor/:visitId?" element={<Advisor />} />
+      <Route path="update/:visitId" element={<UpdatePreview />} />
       <Route element={<AppShell />}>
         {/* ROUTES: each later task adds its <Route> lines directly above the catch-all */}
         <Route path="inspect" element={<Inspect />} />

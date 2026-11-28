@@ -11,6 +11,8 @@ test('approve brakes, decline tire → summary shows $260.00 approved', async ()
   // next undecided item opens
   expect(screen.getByRole('heading', { name: 'Rear tire tread' })).toBeInTheDocument();
   await userEvent.click(screen.getByRole('button', { name: 'Decline this repair' }));
+  expect(screen.getByRole('heading', { name: 'Review your decisions' })).toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Confirm decisions' }));
   expect(screen.getByText('Repair approved')).toBeInTheDocument();
   expect(screen.getByTestId('approved-total')).toHaveTextContent('$260.00');
   expect(screen.getByText('Rear tire tread', { selector: '.declined-item' })).toBeInTheDocument();
@@ -20,6 +22,7 @@ test('declining both shows the nothing-approved summary', async () => {
   renderApp('/review/brake-pads');
   await userEvent.click(screen.getByRole('button', { name: 'Decline this repair' }));
   await userEvent.click(screen.getByRole('button', { name: 'Decline this repair' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Confirm decisions' }));
   expect(screen.getByText('Decisions saved')).toBeInTheDocument();
   expect(screen.getByText('No repairs approved. Your car will be ready for pickup.')).toBeInTheDocument();
 });

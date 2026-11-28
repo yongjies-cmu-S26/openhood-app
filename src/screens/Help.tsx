@@ -61,7 +61,7 @@ export default function Help() {
         variant="secondary"
         block
         onClick={() => {
-          dispatch({ type: 'reset' });
+          dispatch({ type: 'reset', at: Date.now() });
           toast('Demo reset');
         }}
       >

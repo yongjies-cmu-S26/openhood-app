@@ -1,4 +1,4 @@
-import { act, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderApp } from '../test/renderApp';
 import { STORAGE_KEY } from '../state/storage';
@@ -24,12 +24,50 @@ test('typed question is sent and the box clears', async () => {
   expect(box).toHaveValue('');
 });
 
-test('live view switches camera and reflects decisions', async () => {
+test('live view switches camera and reflects confirmed decisions', async () => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ decisions: { 'brake-pads': 'approved', 'tire-tread': 'declined' }, messages: [], seen: [] }));
-  renderApp('/live');
+  renderApp('/done');
+  await userEvent.click(screen.getByRole('button', { name: 'Confirm decisions' }));
+  await userEvent.click(screen.getByRole('link', { name: 'Watch the bay live' }));
   expect(screen.getByText('Repair in progress')).toBeInTheDocument();
   await userEvent.click(screen.getByRole('button', { name: 'Switch to front-wheel camera' }));
   expect(screen.getByText('Camera 2 · Front-wheel camera')).toBeInTheDocument();
+});
+
+test('a lost camera keeps repair status visible and retries the same angle', () => {
+  vi.useFakeTimers();
+  const app = renderApp('/live');
+  fireEvent.click(screen.getByRole('button', { name: 'Switch to front-wheel camera' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Simulate connection loss' }));
+
+  act(() => { vi.advanceTimersByTime(9_999); });
+  expect(screen.queryByText('Camera unavailable')).not.toBeInTheDocument();
+  act(() => { vi.advanceTimersByTime(1); });
+  expect(screen.getByRole('alert')).toHaveTextContent('Camera unavailable');
+  expect(screen.getByRole('heading', { name: 'Inspection complete' })).toBeVisible();
+  expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).live.outages).toEqual([
+    { bay: 'Bay 02', camera: 'front-wheel', at: expect.any(Number) },
+  ]);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+  act(() => { vi.advanceTimersByTime(650); });
+  expect(screen.getByText('Camera 2 · Front-wheel camera')).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Switch to bay overview' })).toBeVisible();
+  expect(screen.queryByText('Camera unavailable')).not.toBeInTheDocument();
+
+  app.unmount();
+  renderApp('/live');
+  expect(screen.getByText('Camera 2 · Front-wheel camera')).toBeVisible();
+});
+
+test('a camera that cannot start immediately offers recovery and stores an outage', () => {
+  renderApp('/live');
+  fireEvent.click(screen.getByRole('button', { name: 'Simulate camera startup failure' }));
+  expect(screen.getByRole('alert')).toHaveTextContent('Camera unavailable');
+  expect(screen.getByRole('button', { name: 'Try again' })).toBeVisible();
+  expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).live.outages).toEqual([
+    { bay: 'Bay 02', camera: 'overview', at: expect.any(Number) },
+  ]);
 });
 
 test('mic falls back to a sample voice note when recording is unavailable', async () => {

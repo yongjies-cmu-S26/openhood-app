@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { VISIT } from '../data/visit';
 import { Icon, type IconName } from './Icon';
+import { OpenHoodLogo } from './OpenHoodLogo';
 
 type TabId = 'car' | 'inspection' | 'help';
 const TABS: { id: TabId; to: string; label: string; icon: IconName }[] = [
@@ -27,14 +28,7 @@ export function AppShell() {
   return (
     <div className="app oh-app">
       <header className="app-top oh-topbar">
-        <Link className="oh-logo" to="/" aria-label="OpenHood home">
-          <span className="oh-logo__mark">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M7 17L17 7M8 7h9v9" />
-            </svg>
-          </span>
-          <span className="oh-logo__word" aria-hidden="true">OpenHood</span>
-        </Link>
+        <OpenHoodLogo />
         <span className="oh-topbar__end">
           <span className="oh-tag oh-tag--navy">{VISIT.ro}</span>
         </span>

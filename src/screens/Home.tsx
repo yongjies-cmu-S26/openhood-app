@@ -4,6 +4,7 @@ import { StatusChip } from '../components/StatusChip';
 import { VISIT } from '../data/visit';
 import { statusCounts, visitStage } from '../state/selectors';
 import { useVisit } from '../state/VisitContext';
+import { currentConfirmation } from '../state/workflow';
 
 const STAGES = ['Check-in', 'Inspect', 'Your review', 'Repair', 'Pickup'];
 const STAGE_INDEX = { review: 2, repair: 3, pickup: 4 } as const;
@@ -18,7 +19,7 @@ const ROWS: { to: string; icon: IconName; title: string; sub: string }[] = [
 
 export default function Home() {
   const { state } = useVisit();
-  const stage = visitStage(state.decisions);
+  const stage = visitStage(currentConfirmation(state.workflow)?.decisions ?? {});
   const current = STAGE_INDEX[stage];
   const counts = statusCounts();
 
@@ -69,7 +70,10 @@ export default function Home() {
           </Link>
         ))}
       </nav>
-      <p className="oh-caption">Sample visit · demo data</p>
+      <div className="oh-cluster">
+        <p className="oh-caption">Sample visit · demo data</p>
+        <Link to="/advisor" className="oh-plain-link">Advisor workspace</Link>
+      </div>
     </>
   );
 }

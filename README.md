@@ -1,6 +1,6 @@
-# OpenHood customer app (MVP)
+# OpenHood app (MVP)
 
-OpenHood is a frontend-only, phone-first customer demo. Customers can inspect vehicle findings, ask the technician, watch a sample bay feed, compare repair timing, and approve or decline repairs.
+OpenHood includes a phone-first customer view and a responsive service-advisor workspace. Customers can inspect findings, ask the technician, compare repair timing, and confirm repair decisions. Advisors can track active visits, send simulated inspection updates, and see customer decisions.
 
 [Open the live demo](https://yongjies-cmu-s26.github.io/openhood-app/)
 
@@ -24,16 +24,21 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:5173`, or use the URL Vite prints if the port is occupied. Choose **Help → Reset demo** to clear the saved chat and repair decisions. To try the vehicle-view fallback, open `http://localhost:5173/#/inspect?model=off`.
+Open `http://localhost:5173`, or use the URL Vite prints if the port is occupied. Choose **Help → Reset demo** to clear saved decisions, chat, advisor activity, and camera history. To try the vehicle-view fallback, open `http://localhost:5173/#/inspect?model=off`.
 
 Run `npm test` to run the tests. Use `npm run build` to generate the static site in `dist/`, then `npm run preview` to serve that build locally.
 
+## Try the MVP workflows
+
+- **Advisor update and approval.** From **My car**, open **Advisor workspace**, select Priya Shah under **Needs update**, and send her update. Open the customer estimate from the message preview, decide on each repair, and select **Confirm decisions**. Return to the advisor dashboard to see the updated visit lane and open the notification bell for the decision record.
+- **Camera recovery.** Open **Watch the bay live**, switch to the front-wheel camera, and select **Simulate connection loss**. After 10 seconds, the outage is recorded and the repair status stays visible. **Simulate camera startup failure** shows the same recovery state immediately. Select **Try again** to reconnect to the same simulated camera.
+
 ## Limitations
 
-- **Sample data and local storage.** The visit, findings, prices, and repair timing estimates are illustrative. Chat messages and repair decisions are stored in the current browser, with no backend or sync across devices.
+- **Sample data and local storage.** Visits, findings, prices, and repair timing estimates are illustrative. Decisions, advisor notifications, chat messages, and camera outages are saved in the browser. Use the same browser profile and app origin to share the customer and advisor demo state between tabs. Only Priya’s visit has a full customer decision flow. Other sample visits show inspection and estimate previews.
 - **Simulated vehicle view and media.** Inspection uses two zoomable SVG views with annotated evidence diagrams. The bay camera is illustrative. Technician replies are scripted. The mic records a real voice question (up to 60 seconds, saved in this browser) and plays it back; if recording is unavailable, a sample note is sent instead. Technician voice replies are read aloud with the browser's built-in speech voice rather than a recorded human voice.
 - **Incomplete customer interactions.** The timing picker supports taps and keyboard selection. Dragging is unavailable. Glossary definitions open a separate screen. Chat always shows the front-brake topic, and navigating away cancels a pending scripted reply.
-- **Customer workflow only.** The service-advisor dashboard and outbound status updates are outside this build. The app does not send SMS, email, or real chat messages, and it does not authenticate users, accept payment, or authorize actual repairs.
+- **Demo delivery and retry.** SMS and email delivery, technician messaging, and camera connections are simulated. The customer and advisor views require no authentication and record demo decisions without taking payment or authorizing actual repair work. Changing an estimate after confirmation is outside this build.
 
 ## Project documents
 
