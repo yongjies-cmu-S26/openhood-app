@@ -19,6 +19,7 @@ const PATHS = {
     </>
   ),
   chat: <path d="M4 5h16v11H9l-5 4z" />,
+  bell: <path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0" />,
   video: (
     <>
       <rect x="2" y="6" width="14" height="12" rx="1" />

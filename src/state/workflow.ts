@@ -1,5 +1,4 @@
 import { ADVISOR_VISITS, getAdvisorVisit, inspectionUpdateLinks, type UpdateChannel, type VisitStatus } from '../data/advisorVisits';
-import { FINDINGS } from '../data/findings';
 import type { Decisions } from '../data/types';
 import { VISIT } from '../data/visit';
 import { allDecided, approvedTotal } from './selectors';
@@ -81,17 +80,13 @@ export function sendInspectionUpdate(workflow: Workflow, id: string, sentAt: num
   };
 }
 
-export function matchesConfirmation(record: DecisionRecord | null, decisions: Decisions) {
-  return record !== null && FINDINGS.every(({ id }) => record.decisions[id] === decisions[id]);
-}
-
 export function currentConfirmation(workflow: Workflow): DecisionRecord | null {
   // A newly sent update needs its own confirmation, even if the choices stay the same.
   return workflow.visits[VISIT.ro].status === 'waiting' ? null : workflow.confirmation;
 }
 
 export function confirmDecisions(workflow: Workflow, decisions: Decisions, confirmedAt: number): Workflow {
-  if (!allDecided(decisions) || matchesConfirmation(currentConfirmation(workflow), decisions)) return workflow;
+  if (!allDecided(decisions) || currentConfirmation(workflow)) return workflow;
 
   const approvedAmount = approvedTotal(decisions);
   const record = { decisions: { ...decisions }, approvedAmount, confirmedAt };

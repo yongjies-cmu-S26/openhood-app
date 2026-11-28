@@ -31,14 +31,14 @@ Run `npm test` to run the tests. Use `npm run build` to generate the static site
 ## Try the MVP workflows
 
 - **Advisor update and approval.** From **My car**, open **Advisor workspace**, select Priya Shah under **Needs update**, and send her update. Open the customer estimate from the message preview, decide on each repair, and select **Confirm decisions**. Return to the advisor dashboard to see the updated visit lane and open the notification bell for the decision record.
-- **Camera recovery.** Open **Watch the bay live**, switch to the front-wheel camera, and select **Simulate connection loss**. After 10 seconds, the outage is recorded and the repair status stays visible. **Simulate camera startup failure** shows the same recovery state immediately. Select **Try again** to reconnect to the same simulated camera.
+- **Camera recovery.** Open **Watch the bay live**, switch to the front-wheel camera, and select **Simulate connection loss**. After 10 seconds, the outage is recorded and the repair status stays visible. **Simulate camera startup failure** shows the same recovery state immediately. Select **Reconnect camera** to reconnect to the same simulated camera.
 
 ## Limitations
 
 - **Sample data and local storage.** Visits, findings, prices, and repair timing estimates are illustrative. Decisions, advisor notifications, chat messages, and camera outages are saved in the browser. Use the same browser profile and app origin to share the customer and advisor demo state between tabs. Only Priya’s visit has a full customer decision flow. Other sample visits show inspection and estimate previews.
 - **Simulated vehicle view and media.** Inspection uses two zoomable SVG views with annotated evidence diagrams. The bay camera is illustrative. Technician replies are scripted. The mic records a real voice question (up to 60 seconds, saved in this browser) and plays it back; if recording is unavailable, a sample note is sent instead. Technician voice replies are read aloud with the browser's built-in speech voice rather than a recorded human voice.
 - **Incomplete customer interactions.** The timing picker supports taps and keyboard selection. Dragging is unavailable. Glossary definitions open a separate screen. Chat always shows the front-brake topic, and navigating away cancels a pending scripted reply.
-- **Demo delivery and retry.** SMS and email delivery, technician messaging, and camera connections are simulated. The customer and advisor views require no authentication and record demo decisions without taking payment or authorizing actual repair work. Changing an estimate after confirmation is outside this build.
+- **Demo delivery and retry.** SMS and email delivery, technician messaging, and camera connections are simulated. The customer and advisor views require no authentication and record demo decisions without taking payment or authorizing actual repair work. Customers can edit their choices before confirming. If the advisor sends a new update, the customer can review and confirm the choices again.
 
 ## Project documents
 

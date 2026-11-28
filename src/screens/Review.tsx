@@ -5,10 +5,13 @@ import { FINDINGS } from '../data/findings';
 import { formatMoney } from '../data/money';
 import { approvedTotal, findingTotal, undecided } from '../state/selectors';
 import { useVisit } from '../state/VisitContext';
+import { currentConfirmation } from '../state/workflow';
 
 export default function Review() {
   const { state, dispatch } = useVisit();
-  const remaining = undecided(state.decisions).length;
+  const receipt = currentConfirmation(state.workflow);
+  const decisions = receipt?.decisions ?? state.decisions;
+  const remaining = undecided(decisions).length;
 
   return (
     <>
@@ -16,10 +19,10 @@ export default function Review() {
       <div className="page-head">
         <div className="oh-label">Customer</div>
         <h1 className="oh-h1">Review repairs</h1>
-        <p className="oh-small">Choose for each item. Approving authorizes the work; you pay at pickup.</p>
+        <p className="oh-small">{receipt ? 'Your choices were sent to the service advisor.' : 'Choose for each item, then confirm all your choices to authorize the work. You pay at pickup.'}</p>
       </div>
       {FINDINGS.map((f) => {
-        const decision = state.decisions[f.id];
+        const decision = decisions[f.id];
         return (
           <article key={f.id} className={`oh-finding review-item${f.status === 'soon' ? ' oh-finding--amber' : ''}`}>
             <div className="review-item__head">
@@ -32,7 +35,7 @@ export default function Review() {
               <FindingStatusChip status={f.status} />
               {decision && <DecisionChip decision={decision} />}
             </div>
-            <div className="review-item__actions">
+            {!receipt && <div className="review-item__actions">
               {decision ? (
                 <Button variant="text" aria-label={`Change decision for ${f.title}`} onClick={() => dispatch({ type: 'decide', id: f.id, decision: null })}>
                   Change decision
@@ -42,7 +45,7 @@ export default function Review() {
                   Review &amp; decide
                 </Button>
               )}
-            </div>
+            </div>}
           </article>
         );
       })}
@@ -50,13 +53,13 @@ export default function Review() {
         <div className="total-bar">
           <span className="oh-h3">Approved total</span>
           <span className="oh-price" data-testid="approved-total">
-            {formatMoney(approvedTotal(state.decisions))}
+            {formatMoney(receipt?.approvedAmount ?? approvedTotal(decisions))}
           </span>
         </div>
-        <p className="oh-small">{remaining === 0 ? 'Every item has a decision.' : `${remaining} of ${FINDINGS.length} items still need a decision.`}</p>
+        <p className="oh-small">{receipt ? 'Decisions confirmed.' : remaining === 0 ? 'Every item has a decision.' : `${remaining} of ${FINDINGS.length} items still need a decision.`}</p>
       </section>
       <Button to="/done" block>
-        See decision summary
+        {receipt ? 'View confirmation' : 'See decision summary'}
       </Button>
     </>
   );

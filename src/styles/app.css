@@ -3,6 +3,7 @@ html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: #dfe7ec; color: var(--oh-ink); font-family: var(--oh-font); }
 #root { min-height: 100dvh; }
 a { color: inherit; }
+.oh-plain-link { display: inline-flex; align-items: center; min-block-size: 44px; min-inline-size: 44px; color: var(--oh-blue-text); }
 
 .app { max-width: 480px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; background: var(--oh-canvas); box-shadow: 0 0 0 1px var(--oh-line); }
 .app-top { position: sticky; top: 0; z-index: 20; padding-top: max(12px, env(safe-area-inset-top, 0px)); }

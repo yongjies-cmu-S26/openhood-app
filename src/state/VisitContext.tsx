@@ -1,31 +1,30 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type Dispatch, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { reducer, type Action, type State } from './reducer';
 import { loadState, safeStorage, saveState, STORAGE_KEY } from './storage';
 
 interface VisitValue {
   state: State;
-  dispatch: Dispatch<Action>;
+  dispatch: (action: Action) => Promise<State | null>;
   /** false when this browser blocks localStorage */
   storageOk: boolean;
 }
 
 const VisitContext = createContext<VisitValue | null>(null);
 
-function withStorageLock(write: () => void) {
+async function withStorageLock<T>(write: () => T): Promise<T> {
   const locks = window.navigator.locks;
-  if (!locks) {
-    write();
-    return;
-  }
+  if (!locks) return write();
 
   let acquired = false;
-  void locks.request(STORAGE_KEY, () => {
-    acquired = true;
-    write();
-  }).catch((error: unknown) => {
+  try {
+    return await locks.request(STORAGE_KEY, () => {
+      acquired = true;
+      return write();
+    });
+  } catch (error) {
     if (acquired) throw error;
-    write();
-  });
+    return write();
+  }
 }
 
 export function VisitProvider({ children }: { children: ReactNode }) {
@@ -42,19 +41,29 @@ export function VisitProvider({ children }: { children: ReactNode }) {
     setStorageOk(saved);
   }, []);
 
-  const dispatch = useCallback<Dispatch<Action>>((action) => {
-    withStorageLock(() => {
-      const storage = safeStorage();
-      const current = hasUnsavedChanges.current ? latest.current : loadState(storage, latest.current);
-      persist(reducer(current, action), storage);
-    });
+  const dispatch = useCallback<VisitValue['dispatch']>(async (action) => {
+    try {
+      return await withStorageLock(() => {
+        const storage = safeStorage();
+        const current = hasUnsavedChanges.current ? latest.current : loadState(storage, latest.current);
+        const next = reducer(current, action);
+        persist(next, storage);
+        return next;
+      });
+    } catch (error) {
+      console.error('Could not update visit state', error);
+      return null;
+    }
   }, [persist]);
 
   useEffect(() => {
     const storage = safeStorage();
     let active = true;
-    withStorageLock(() => {
+    void withStorageLock(() => {
       if (active) persist(loadState(storage, latest.current), storage);
+    }).catch((error: unknown) => {
+      console.error('Could not initialize visit state', error);
+      if (active) setStorageOk(false);
     });
 
     function sync(event: StorageEvent) {

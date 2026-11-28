@@ -7,14 +7,17 @@ import { FINDINGS } from '../data/findings';
 import { VISIT } from '../data/visit';
 import { visitStage } from '../state/selectors';
 import { useVisit } from '../state/VisitContext';
-import { CAMERA_LABELS, currentConfirmation } from '../state/workflow';
+import { CAMERA_LABELS, currentConfirmation, type Camera } from '../state/workflow';
 
-type FeedStatus = 'showing' | 'waiting' | 'unavailable' | 'reconnecting';
+type Feed =
+  | { status: 'showing' }
+  | { status: 'waiting' | 'unavailable' | 'reconnecting'; camera: Camera };
 
 export default function Live() {
   const { state, dispatch } = useVisit();
-  const [feedStatus, setFeedStatus] = useState<FeedStatus>('showing');
-  const [camera, setCamera] = useState(state.live.camera);
+  const [feed, setFeed] = useState<Feed>({ status: 'showing' });
+  const feedStatus = feed.status;
+  const camera = feed.status === 'showing' ? state.live.camera : feed.camera;
   const timer = useRef<number | undefined>(undefined);
   const confirmed = currentConfirmation(state.workflow)?.decisions ?? {};
   const stage = visitStage(confirmed);
@@ -25,25 +28,24 @@ export default function Live() {
 
   function switchCamera() {
     const next = camera === 'overview' ? 'front-wheel' : 'overview';
-    setCamera(next);
     dispatch({ type: 'select-camera', camera: next });
   }
 
-  function recordOutage() {
+  function recordOutage(camera: Camera) {
     dispatch({ type: 'record-camera-outage', outage: { bay: VISIT.bay, camera, at: Date.now() } });
-    setFeedStatus('unavailable');
+    setFeed({ status: 'unavailable', camera });
   }
 
   function simulateLoss() {
-    setFeedStatus('waiting');
-    timer.current = window.setTimeout(recordOutage, 10_000);
+    setFeed({ status: 'waiting', camera });
+    timer.current = window.setTimeout(() => recordOutage(camera), 10_000);
   }
 
   function retry() {
-    setFeedStatus('reconnecting');
-    timer.current = window.setTimeout(() => {
-      dispatch({ type: 'select-camera', camera });
-      setFeedStatus('showing');
+    setFeed({ status: 'reconnecting', camera });
+    timer.current = window.setTimeout(async () => {
+      const next = await dispatch({ type: 'select-camera', camera });
+      setFeed(next ? { status: 'showing' } : { status: 'unavailable', camera });
     }, 650);
   }
 
@@ -76,7 +78,7 @@ export default function Live() {
         {feedStatus === 'waiting' && <p className="oh-small" role="status">Waiting for the simulated camera signal…</p>}
         {feedStatus === 'unavailable' && (
           <Notice tone="error" title="Camera unavailable">
-            The camera stopped sending a signal. Your current repair status is still available below.
+            The camera signal is unavailable. Your current repair status is still available below.
           </Notice>
         )}
         {feedStatus === 'reconnecting' && <p className="oh-small" role="status">Reconnecting to the same camera…</p>}
@@ -85,26 +87,26 @@ export default function Live() {
         <h2 className="oh-h3">{status.title}</h2>
         <p className="oh-small">{status.body}</p>
       </section>
+      {stage === 'review' && (
+        <Button to="/review" block>
+          Review recommended repairs
+        </Button>
+      )}
       {feedStatus === 'showing' && (
         <Button variant="dark" block onClick={switchCamera}>
           {camera === 'overview' ? 'Switch to front-wheel camera' : 'Switch to bay overview'}
         </Button>
       )}
       <Button
-        variant={feedStatus === 'unavailable' ? 'dark' : 'secondary'}
+        variant={feedStatus === 'unavailable' || feedStatus === 'reconnecting' ? 'dark' : 'secondary'}
         block
-        aria-disabled={connectionPending || undefined}
-        onClick={connectionPending ? undefined : feedStatus === 'unavailable' ? retry : simulateLoss}
+        disabled={connectionPending}
+        onClick={feedStatus === 'unavailable' ? retry : simulateLoss}
       >
-        {feedStatus === 'unavailable' ? 'Try again' : connectionPending ? 'Camera connection pending' : 'Simulate connection loss'}
+        {feedStatus === 'unavailable' || feedStatus === 'reconnecting' ? 'Reconnect camera' : 'Simulate connection loss'}
       </Button>
       {feedStatus === 'showing' && (
-        <Button variant="secondary" block onClick={recordOutage}>Simulate camera startup failure</Button>
-      )}
-      {stage === 'review' && (
-        <Button to="/review" block>
-          Review recommended repairs
-        </Button>
+        <Button variant="secondary" block onClick={() => recordOutage(camera)}>Simulate camera startup failure</Button>
       )}
     </>
   );

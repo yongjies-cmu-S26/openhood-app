@@ -1,5 +1,5 @@
 import type { Decision, Decisions, FindingId, Message } from '../data/types';
-import { confirmDecisions, createWorkflow, sendInspectionUpdate, type Camera, type CameraOutage, type LiveSession, type Workflow } from './workflow';
+import { confirmDecisions, createWorkflow, currentConfirmation, sendInspectionUpdate, type Camera, type CameraOutage, type LiveSession, type Workflow } from './workflow';
 
 export interface State {
   decisions: Decisions;
@@ -43,6 +43,7 @@ export const initialState: State = {
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'decide': {
+      if (currentConfirmation(state.workflow)) return state;
       const decisions: Decisions = { ...state.decisions };
       if (action.decision === null) delete decisions[action.id];
       else decisions[action.id] = action.decision;

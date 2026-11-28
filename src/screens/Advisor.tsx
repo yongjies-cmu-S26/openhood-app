@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AdvisorFindings } from '../components/AdvisorFindings';
-import { BackLink } from '../components/BackLink';
 import { Button } from '../components/Button';
 import { EvidenceDiagram } from '../components/EvidenceDiagram';
 import { Icon } from '../components/Icon';
@@ -16,8 +15,10 @@ import { VISIT } from '../data/visit';
 import { useVisit } from '../state/VisitContext';
 import type { AdvisorNotification, VisitProgress } from '../state/workflow';
 
-function waitingTime(enteredAt: number, now: number) {
-  const minutes = Math.max(0, Math.floor((now - enteredAt) / 60_000));
+const LATE_WAIT_MINUTES = 40;
+const LAST_ADVISOR_TOAST_KEY = 'openhood.last-advisor-toast';
+
+function waitingTime(minutes: number) {
   const hours = Math.floor(minutes / 60);
   return hours ? hours + ' hr ' + (minutes % 60) + ' min' : minutes + ' min';
 }
@@ -46,7 +47,7 @@ function AdvisorNotifications({ notifications, onRead }: { notifications: Adviso
             return (
               <li key={id}>
                 <div className="advisor-heading">
-                  <Link to={'/advisor/' + VISIT.ro} className="oh-h3">{VISIT.customerName} confirmed repair decisions</Link>
+                  <Link to={'/advisor/' + VISIT.ro} className="oh-h3 oh-plain-link">{VISIT.customerName} confirmed repair decisions</Link>
                   {unread && <span className="oh-tag oh-tag--outline">Unread</span>}
                 </div>
                 <p className="oh-small">Approved {formatMoney(record.approvedAmount)} · <Timestamp at={record.confirmedAt} /></p>
@@ -63,28 +64,45 @@ function AdvisorNotifications({ notifications, onRead }: { notifications: Adviso
 
 function VisitCard({ visit, progress, now, primary }: { visit: AdvisorVisit; progress: VisitProgress; now: number; primary: boolean }) {
   const actionLabel = progress.status === 'needs-update' ? 'Review update' : 'View visit';
+  const minutes = Math.max(0, Math.floor((now - progress.enteredAt) / 60_000));
+  const late = minutes >= LATE_WAIT_MINUTES;
 
   return (
-    <article className="oh-panel advisor-visit-card">
-      <div className="advisor-heading">
+    <article className="oh-wo advisor-visit-card">
+      <div className="oh-wo__head">
+        <span>{visit.id}</span>
+        <span className="oh-tag">{visit.bay}</span>
+      </div>
+      <div className="oh-wo__body">
         <h3 className="oh-h3">{visit.customer}</h3>
-        <span className="oh-caption">{visit.id}</span>
+        <p className="oh-small">{visit.vehicle}</p>
+        <AdvisorFindings findings={visit.findings} status={progress.status} />
       </div>
-      <p className="oh-small">{visit.vehicle}</p>
-      <div className="advisor-visit-meta">
-        <span className="oh-tag oh-tag--outline">{visit.bay}</span>
-        <span className="oh-caption"><Icon name="clock" size={14} /> Waiting {waitingTime(progress.enteredAt, now)}</span>
+      <div className="oh-wo__foot">
+        <span className={late ? 'oh-wait oh-wait--late' : 'oh-wait'}>
+          <Icon name="clock" size={16} /> {late ? 'Long wait · ' : 'Waiting '}{waitingTime(minutes)}
+        </span>
+        <Button
+          variant={primary ? 'primary' : 'secondary'}
+          to={'/advisor/' + visit.id}
+          aria-label={actionLabel + ' for ' + visit.customer}
+          small
+        >
+          {actionLabel}
+        </Button>
       </div>
-      <AdvisorFindings findings={visit.findings} status={progress.status} />
-      <Button
-        variant={primary ? 'primary' : 'secondary'}
-        to={'/advisor/' + visit.id}
-        aria-label={actionLabel + ' for ' + visit.customer}
-        block
-      >
-        {actionLabel}
-      </Button>
     </article>
+  );
+}
+
+function AdvisorBreadcrumbs({ current }: { current: string }) {
+  return (
+    <nav aria-label="Breadcrumb">
+      <ol className="oh-crumbs">
+        <li><Link className="oh-plain-link" to="/advisor">Advisor dashboard</Link></li>
+        <li aria-current="page">{current}</li>
+      </ol>
+    </nav>
   );
 }
 
@@ -100,7 +118,7 @@ function VisitDetails({ visit, progress }: { visit: AdvisorVisit; progress: Visi
 
   return (
     <>
-      <BackLink to="/advisor" label="Advisor dashboard" />
+      <AdvisorBreadcrumbs current={visit.id} />
       <div className="page-head">
         <h1 className="oh-h1">{maySend ? 'Send customer update' : 'Visit details'}</h1>
         <p className="oh-small">{visit.customer} · {visit.vehicle}</p>
@@ -119,8 +137,8 @@ function VisitDetails({ visit, progress }: { visit: AdvisorVisit; progress: Visi
           <section className="oh-panel stack" aria-label="Customer message preview">
             <h2 className="oh-h3">Inspection ready</h2>
             <p className="oh-small">Hi {visit.customer.split(' ')[0]}, your inspection is ready. Open the links to see the findings and review your estimate.</p>
-            <Link to={links.inspection}>Open customer inspection</Link>
-            <Link to={links.estimate}>Open customer estimate</Link>
+            <Link className="oh-plain-link" to={links.inspection}>Open customer inspection</Link>
+            <Link className="oh-plain-link" to={links.estimate}>Open customer estimate</Link>
             <p className="oh-caption">Simulated {visit.channel} · No message leaves this device</p>
             {maySend && <Button block onClick={sendUpdate}>Send update to {visit.customer.split(' ')[0]}</Button>}
           </section>
@@ -168,8 +186,8 @@ export default function Advisor() {
   const { visits, notifications } = state.workflow;
   const unread = notifications.filter((notification) => notification.unread).length;
   const latestUnread = notifications.find((notification) => notification.unread);
-  const lastUnreadId = latestUnread?.id;
   const latestRecord = latestUnread?.record;
+  const notificationKey = latestUnread ? latestUnread.id + ':' + latestUnread.record.confirmedAt : '';
   const approvedTitles = latestRecord ? FINDINGS.filter(({ id }) => latestRecord.decisions[id] === 'approved').map(({ title }) => title.toLowerCase()) : [];
   const notificationText = latestRecord
     ? VISIT.customerName + (approvedTitles.length ? ' approved ' + approvedTitles.join(' and ') : ' declined all repairs') + ' · ' + formatMoney(latestRecord.approvedAmount)
@@ -185,31 +203,41 @@ export default function Advisor() {
   }, []);
 
   useEffect(() => {
-    if (notificationText) showToast(notificationText);
-  }, [lastUnreadId, notificationText, showToast]);
+    if (!notificationKey) return;
+    try {
+      if (sessionStorage.getItem(LAST_ADVISOR_TOAST_KEY) === notificationKey) return;
+      sessionStorage.setItem(LAST_ADVISOR_TOAST_KEY, notificationKey);
+    } catch {
+      // The notification remains available from the bell when session storage is blocked.
+    }
+    showToast(notificationText);
+  }, [notificationKey, notificationText, showToast]);
 
   return (
     <div className="oh-app oh-desk advisor">
-      <header className="advisor-top">
+      <header className="oh-topbar advisor-top">
         <div className="advisor-top-inner">
           <div className="advisor-brand">
             <OpenHoodLogo to="/advisor" label="OpenHood advisor dashboard" />
-            <span className="advisor-workspace oh-label">Service desk</span>
+            <span className="oh-topbar__section">Service desk</span>
           </div>
-          <nav className="advisor-top-actions" aria-label="Workspace navigation">
-            <Button variant="secondary" to="/">Customer view</Button>
+          <div className="oh-topbar__end advisor-top-actions">
+            <span className="advisor-account">{VISIT.advisor} · Service advisor</span>
+            <nav aria-label="Workspace navigation">
+              <Link className="oh-plain-link" to="/">Customer view</Link>
+            </nav>
             <Button
-              variant="secondary"
+              variant="dark"
               className="advisor-bell oh-btn--icon"
               aria-label={'Notifications (' + unread + ' unread)'}
               aria-controls="advisor-notifications"
               aria-expanded={notificationsOpen}
               onClick={() => setNotificationsOpen((open) => !open)}
             >
-              <span className="advisor-bell-icon" aria-hidden="true" />
-              {unread > 0 && <span className="advisor-bell-count" aria-hidden="true">{unread}</span>}
+              <Icon name="bell" />
+              {unread > 0 && <span className="oh-count" aria-hidden="true">{unread}</span>}
             </Button>
-          </nav>
+          </div>
         </div>
       </header>
       <main className="oh-desk__main advisor-main">
@@ -222,14 +250,13 @@ export default function Advisor() {
           <VisitDetails visit={visit} progress={visits[visit.id]} />
         ) : visitId ? (
           <>
-            <BackLink to="/advisor" label="Advisor dashboard" />
+            <AdvisorBreadcrumbs current="Visit not found" />
             <Notice title="Visit not found">Choose an active visit from the dashboard.</Notice>
           </>
         ) : (
           <>
             <div className="advisor-heading advisor-board-heading">
               <div className="page-head">
-                <div className="oh-label">{VISIT.advisor} · Service advisor</div>
                 <h1 className="oh-h1">Advisor dashboard</h1>
                 <p className="oh-small">Keep customers informed and repairs moving.</p>
               </div>
@@ -256,8 +283,10 @@ export default function Advisor() {
             </div>
           </>
         )}
-        <footer className="advisor-footer oh-caption">Demo data · Sample visits and estimates · No messages are sent</footer>
       </main>
+      <footer className="advisor-footer oh-caption">
+        <div className="advisor-footer-inner">Demo data · Sample visits and estimates · No messages are sent</div>
+      </footer>
     </div>
   );
 }

@@ -7,12 +7,13 @@ interface Props {
   title: string;
   eyebrow?: string;
   confirmLabel: string;
+  confirmDisabled?: boolean;
   onConfirm: () => void;
   onClose: () => void;
   children: ReactNode;
 }
 
-export function ConfirmSheet({ open, title, eyebrow, confirmLabel, onConfirm, onClose, children }: Props) {
+export function ConfirmSheet({ open, title, eyebrow, confirmLabel, confirmDisabled, onConfirm, onClose, children }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -48,7 +49,7 @@ export function ConfirmSheet({ open, title, eyebrow, confirmLabel, onConfirm, on
       </div>
       <div className="oh-dialog__body">{children}</div>
       <div className="oh-dialog__foot">
-        <Button block onClick={onConfirm}>
+        <Button block disabled={confirmDisabled} onClick={onConfirm}>
           {confirmLabel}
         </Button>
         <Button variant="secondary" block onClick={onClose}>

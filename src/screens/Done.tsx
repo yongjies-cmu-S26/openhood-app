@@ -6,15 +6,15 @@ import { formatMoney } from '../data/money';
 import { VISIT } from '../data/visit';
 import { approvedTotal, findingTotal, undecided } from '../state/selectors';
 import { useVisit } from '../state/VisitContext';
-import { currentConfirmation, matchesConfirmation } from '../state/workflow';
+import { currentConfirmation } from '../state/workflow';
 
 export default function Done() {
   const { state, dispatch } = useVisit();
-  const approved = FINDINGS.filter((f) => state.decisions[f.id] === 'approved');
-  const declined = FINDINGS.filter((f) => state.decisions[f.id] === 'declined');
-  const open = undecided(state.decisions);
-  const confirmation = currentConfirmation(state.workflow);
-  const receipt = matchesConfirmation(confirmation, state.decisions) ? confirmation : null;
+  const receipt = currentConfirmation(state.workflow);
+  const decisions = receipt?.decisions ?? state.decisions;
+  const approved = FINDINGS.filter((f) => decisions[f.id] === 'approved');
+  const declined = FINDINGS.filter((f) => decisions[f.id] === 'declined');
+  const open = undecided(decisions);
 
   if (approved.length === 0 && declined.length === 0) {
     return (
@@ -38,11 +38,13 @@ export default function Done() {
         <span className="oh-label">
           {VISIT.ro} · Decision summary
         </span>
-        <h1 className="oh-display done-display">{receipt ? (anyApproved ? 'Repair approved' : 'Decisions saved') : 'Review your decisions'}</h1>
+        <h1 className={receipt ? 'oh-display done-display' : 'oh-h1'}>{receipt ? (anyApproved ? 'Repair approved' : 'Decisions saved') : 'Review your decisions'}</h1>
         <p>
           {receipt
             ? (anyApproved ? `${VISIT.technician.name} starts in ${VISIT.bay}. You pay at pickup.` : 'No repairs approved. Your car will be ready for pickup.')
-            : 'Confirm your choices to send them to the service advisor.'}
+            : open.length > 0
+              ? 'Decide on every repair before sending your choices to the service advisor.'
+              : 'Confirm your choices to send them to the service advisor.'}
         </p>
         {confirmedAt && <time className="oh-caption" dateTime={confirmedAt.toISOString()}>Confirmed · {confirmedAt.toLocaleString()}</time>}
       </section>
@@ -108,9 +110,7 @@ export default function Done() {
       ) : open.length === 0 && (
         <Button block onClick={() => dispatch({ type: 'confirm-decisions', at: Date.now() })}>Confirm decisions</Button>
       )}
-      <Button variant="text" to="/review">
-        Change decisions
-      </Button>
+      {!receipt && <Button variant="text" to="/review">Change decisions</Button>}
     </>
   );
 }

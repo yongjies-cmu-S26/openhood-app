@@ -34,11 +34,12 @@ test('live view switches camera and reflects confirmed decisions', async () => {
   expect(screen.getByText('Camera 2 · Front-wheel camera')).toBeInTheDocument();
 });
 
-test('a lost camera keeps repair status visible and retries the same angle', () => {
+test('a lost camera keeps repair status visible and retries the same angle', async () => {
   vi.useFakeTimers();
   const app = renderApp('/live');
   fireEvent.click(screen.getByRole('button', { name: 'Switch to front-wheel camera' }));
   fireEvent.click(screen.getByRole('button', { name: 'Simulate connection loss' }));
+  expect(screen.getByRole('button', { name: 'Simulate connection loss' })).toBeDisabled();
 
   act(() => { vi.advanceTimersByTime(9_999); });
   expect(screen.queryByText('Camera unavailable')).not.toBeInTheDocument();
@@ -49,8 +50,17 @@ test('a lost camera keeps repair status visible and retries the same angle', () 
     { bay: 'Bay 02', camera: 'front-wheel', at: expect.any(Number) },
   ]);
 
-  fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
-  act(() => { vi.advanceTimersByTime(650); });
+  const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!);
+  stored.live.camera = 'overview';
+  act(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+    window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY, storageArea: localStorage }));
+  });
+  expect(screen.getByText('Camera 2 · Front-wheel camera')).toBeVisible();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Reconnect camera' }));
+  expect(screen.getByRole('button', { name: 'Reconnect camera' })).toBeDisabled();
+  await act(async () => { vi.advanceTimersByTime(650); });
   expect(screen.getByText('Camera 2 · Front-wheel camera')).toBeVisible();
   expect(screen.getByRole('button', { name: 'Switch to bay overview' })).toBeVisible();
   expect(screen.queryByText('Camera unavailable')).not.toBeInTheDocument();
@@ -64,7 +74,7 @@ test('a camera that cannot start immediately offers recovery and stores an outag
   renderApp('/live');
   fireEvent.click(screen.getByRole('button', { name: 'Simulate camera startup failure' }));
   expect(screen.getByRole('alert')).toHaveTextContent('Camera unavailable');
-  expect(screen.getByRole('button', { name: 'Try again' })).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Reconnect camera' })).toBeVisible();
   expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).live.outages).toEqual([
     { bay: 'Bay 02', camera: 'overview', at: expect.any(Number) },
   ]);

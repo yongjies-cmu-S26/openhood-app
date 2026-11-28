@@ -10,16 +10,22 @@ test('the advisor dashboard groups visits by status and sorts each lane by longe
   const visit = within(lane).getByRole('heading', { name: 'Elena Rodriguez' }).closest('article')!;
   expect(within(visit).getByText('2019 Subaru Outback')).toBeVisible();
   expect(within(visit).getByText('Bay 01')).toBeVisible();
-  expect(within(visit).getByText(/Waiting \d/)).toBeVisible();
+  expect(within(visit).getByText(/Long wait ·/)).toHaveClass('oh-wait--late');
   expect(within(visit).getByText('Front control arm')).toBeVisible();
   expect(within(visit).getByText('$480.00')).toBeVisible();
   expect(within(visit).getByText('Needs attention')).toBeVisible();
+  const pickupLane = within(screen.getByRole('region', { name: 'Ready for pickup' }));
+  expect(pickupLane.getByText('Completed')).toBeVisible();
+  expect(pickupLane.getByText('Original urgency · Needs attention')).toBeVisible();
+  expect(pickupLane.queryByText('Needs attention')).not.toBeInTheDocument();
 });
 
 test('sending an inspection update records delivery and moves the visit after reload', async () => {
   const user = userEvent.setup();
   const app = renderApp('/advisor');
   await user.click(screen.getByRole('link', { name: 'Review update for Marcus Chen' }));
+  expect(within(screen.getByRole('navigation', { name: 'Breadcrumb' })).getByText('RO-1051')).toHaveAttribute('aria-current', 'page');
+  expect(screen.getByText('Alex · Service advisor')).toBeVisible();
   expect(screen.getByText('Preferred channel · Email')).toBeVisible();
   await user.click(screen.getByRole('button', { name: 'Send update to Marcus' }));
   expect(screen.getByText('Email update delivered · Demo')).toBeVisible();
@@ -54,6 +60,12 @@ test('confirmed customer decisions move the visit and create a persistent adviso
   await user.click(screen.getByRole('link', { name: 'My car' }));
   await user.click(screen.getByRole('link', { name: 'Advisor workspace' }));
   expect(within(screen.getByRole('region', { name: 'Approved – in repair' })).getByText('Priya Shah')).toBeVisible();
+  const toastText = 'Priya Shah approved front brake pads · $260.00';
+  expect(screen.getByText(toastText)).toBeVisible();
+  app.unmount();
+
+  const reopened = renderApp('/advisor');
+  expect(screen.queryByText(toastText)).not.toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: 'Notifications (1 unread)' }));
   const notifications = within(screen.getByRole('region', { name: 'Advisor notifications' }));
   expect(notifications.getByText(/Approved \$260\.00/)).toBeVisible();
@@ -61,7 +73,7 @@ test('confirmed customer decisions move the visit and create a persistent adviso
   expect(notifications.getByText('Declined repairs · Rear tire tread')).toBeVisible();
   await user.click(notifications.getByRole('button', { name: 'Mark all as read' }));
 
-  app.unmount();
+  reopened.unmount();
   renderApp('/advisor');
   await user.click(screen.getByRole('button', { name: 'Notifications (0 unread)' }));
   expect(screen.getByText(/Approved \$260\.00/)).toBeVisible();
