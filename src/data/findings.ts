@@ -11,6 +11,11 @@ export const FINDINGS: Finding[] = [
       'front-left': { x: 88, y: 150, far: false },
       'rear-right': { x: 252, y: 98, far: true },
     },
+    hotspot: {
+      position: '0.62m 0.25m 0.66m',
+      normal: '1m 0m 0m',
+      preset: 'front-left',
+    },
     summary: 'The pads are worn thin. Your shop recommends replacing the front pair to restore braking.',
     whatIsWrong: 'Front brake pads are worn thin from normal use.',
     impact: 'Replacing worn pads helps restore predictable braking and stopping response.',
@@ -37,6 +42,11 @@ export const FINDINGS: Finding[] = [
     markers: {
       'front-left': { x: 252, y: 98, far: true },
       'rear-right': { x: 88, y: 150, far: false },
+    },
+    hotspot: {
+      position: '-0.62m 0.25m -0.66m',
+      normal: '-1m 0m 0m',
+      preset: 'rear-right',
     },
     summary: 'The rear right tire tread is getting shallow. Plan a replacement before the rainy season.',
     whatIsWrong: 'Tread on the rear right tire is worn close to the limit.',
