@@ -6,7 +6,7 @@ OpenHood includes a phone-first customer view and a responsive service-advisor w
 
 ## Technology stack
 
-- React 18 and TypeScript for the app, with Vite for development and production builds.
+- **React 18 and TypeScript** for the app, with `@google/model-viewer` for the `/inspect` 3D vehicle view and Vite for development and production builds.
 - React Router with hash routing so routes work on GitHub Pages.
 - Plain CSS with shared design tokens and browser `localStorage` for demo state.
 - Vitest, Testing Library, and jsdom for tests. GitHub Actions builds and deploys the static site on pushes to `main`.
@@ -36,7 +36,7 @@ Run `npm test` to run the tests. Use `npm run build` to generate the static site
 ## Limitations
 
 - **Sample data and local storage.** Visits, findings, prices, and repair timing estimates are illustrative. Decisions, advisor notifications, chat messages, and camera outages are saved in the browser. Use the same browser profile and app origin to share the customer and advisor demo state between tabs. Only Priya’s visit has a full customer decision flow. Other sample visits show inspection and estimate previews.
-- **Simulated vehicle view and media.** Inspection uses two zoomable SVG views with annotated evidence diagrams. The bay camera is illustrative. Technician replies are scripted. The mic records a real voice question (up to 60 seconds, saved in this browser) and plays it back; if recording is unavailable, a sample note is sent instead. Technician voice replies are read aloud with the browser's built-in speech voice rather than a recorded human voice.
+- **Illustrative 3D vehicle model and simulated media.** Inspection on `/inspect` uses a bundled CC0 low-poly sedan `.glb` (`@google/model-viewer`) labeled **Illustrative vehicle model** with wheel-mounted 3D markers, camera presets, and a fallback when WebGL, the model, or `?model=off` disables 3D; each finding links to annotated SVG evidence diagrams. The bay camera on `/live` remains an illustrative SVG feed. Technician replies are scripted. The mic records a real voice question (up to 60 seconds, saved in this browser) and plays it back; if recording is unavailable, a sample note is sent instead. Technician voice replies are read aloud with the browser's built-in speech voice rather than a recorded human voice.
 - **Incomplete customer interactions.** The timing picker supports taps and keyboard selection. Dragging is unavailable. Glossary definitions open a separate screen. Chat always shows the front-brake topic, and navigating away cancels a pending scripted reply.
 - **Demo delivery and retry.** SMS and email delivery, technician messaging, and camera connections are simulated. The customer and advisor views require no authentication and record demo decisions without taking payment or authorizing actual repair work. Customers can edit their choices before confirming. If the advisor sends a new update, the customer can review and confirm the choices again.
 

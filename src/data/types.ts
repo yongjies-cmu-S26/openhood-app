@@ -29,6 +29,15 @@ export interface Marker {
   far: boolean;
 }
 
+export interface Hotspot3D {
+  /** 3D coordinates on the sedan mesh ("x y z" in meters) */
+  position: string;
+  /** Outward surface normal ("x y z") used to hide back-facing markers */
+  normal: string;
+  /** Camera preset where this wheel initially faces the viewer */
+  preset: View;
+}
+
 export interface Finding {
   id: FindingId;
   number: 1 | 2;
@@ -36,6 +45,7 @@ export interface Finding {
   status: FindingStatus;
   location: string;
   markers: Record<View, Marker>;
+  hotspot: Hotspot3D;
   summary: string;
   whatIsWrong: string;
   impact: string;

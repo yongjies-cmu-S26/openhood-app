@@ -52,6 +52,18 @@ p.oh-small, p.oh-body { margin: 0; }
 .car-marker.is-selected .car-marker__badge { outline: 3px solid var(--oh-blue); outline-offset: 3px; }
 .car-view__caption { margin: 10px 0 0; }
 
+/* 3D inspection viewer */
+.vehicle-viewer { display: grid; gap: 10px; }
+.vehicle-viewer .car-view__caption { margin: 0; }
+.vehicle-viewer > model-viewer { display: block; inline-size: 100%; block-size: 240px; border-radius: var(--oh-radius-sm); background: radial-gradient(circle at 50% 62%, var(--oh-paper) 0%, var(--oh-canvas) 100%); --min-hotspot-opacity: 0; }
+.vehicle-hotspot { min-inline-size: 44px; min-block-size: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; }
+.vehicle-hotspot[hidden] { display: none; }
+.vehicle-hotspot.is-selected .car-marker__badge { outline: 3px solid var(--oh-blue); outline-offset: 3px; }
+.vehicle-hotspot:focus-visible { box-shadow: none; }
+.vehicle-hotspot:focus-visible .car-marker__badge { box-shadow: 0 0 0 3px var(--edge), var(--oh-focus); }
+.viewer-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--oh-space-2); }
+.viewer-controls .oh-btn { min-inline-size: 44px; min-block-size: 44px; }
+
 /* Evidence */
 .evidence { background: #f6f9fb; border: 1px solid var(--oh-line); border-radius: var(--oh-radius); padding: 8px; }
 .evidence svg { display: block; width: 100%; height: auto; }
